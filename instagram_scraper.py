@@ -52,10 +52,13 @@ def login_if_needed(page) -> None:
 	page.wait_for_load_state("domcontentloaded", timeout=NAVIGATION_TIMEOUT_MS)
 
 	# Accept cookies if prompted
-	wait_and_click(page, 'button:has-text("Allow all cookies")') or wait_and_click(page, 'button:has-text("Allow essential cookies")') or wait_and_click(page, 'button:has-text("Accept")')
+	# Use short timeouts to avoid long initial delays when banners are absent
+	wait_and_click(page, 'button:has-text("Allow all cookies")', timeout=2_000) \
+		or wait_and_click(page, 'button:has-text("Allow essential cookies")', timeout=2_000) \
+		or wait_and_click(page, 'button:has-text("Accept")', timeout=2_000)
 
 	# Check for login form
-	if not element_is_present(page, 'input[name="username"]', timeout=4_000):
+	if not element_is_present(page, 'input[name="username"]', timeout=2_000):
 		# Likely already logged in
 		return
 
@@ -67,12 +70,18 @@ def login_if_needed(page) -> None:
 	wait_and_click(page, 'button[type="submit"]')
 
 	# Wait for potential login challenges/2FA; user can complete in the visible browser
-	page.wait_for_load_state("networkidle", timeout=NAVIGATION_TIMEOUT_MS)
+	# Wait for URL to change away from login (without forcing a navigation)
+	try:
+		page.wait_for_url(re.compile(r"instagram\.com/(?!accounts/login)"), timeout=NAVIGATION_TIMEOUT_MS)
+	except Exception:
+		pass
+	# Relax to domcontentloaded to avoid long idle waits
+	page.wait_for_load_state("domcontentloaded", timeout=NAVIGATION_TIMEOUT_MS)
 
 	# Dismiss "Save Your Login Info?" if present
-	wait_and_click(page, 'button:has-text("Not now")')
+	wait_and_click(page, 'button:has-text("Not now")', timeout=2_000)
 	# Dismiss "Turn on Notifications" if present
-	wait_and_click(page, 'button:has-text("Not Now")') or wait_and_click(page, 'div[role="dialog"] button:has-text("Not Now")')
+	wait_and_click(page, 'button:has-text("Not Now")', timeout=2_000) or wait_and_click(page, 'div[role="dialog"] button:has-text("Not Now")', timeout=2_000)
 
 
 def save_storage_state(context) -> None:
