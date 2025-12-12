@@ -62,6 +62,7 @@ You will see a browser window. The script will:
 - Open the first 5 posts
 - Open the likers list for each post and scroll to collect usernames (up to the configured limit)
 - Append rows to your Google Sheet: timestamp, account, post URL, username
+- gsheet url: https://docs.google.com/spreadsheets/d/1t5ZSldXlDCVNp5ZYUsSeWT0UxvGSxLfF-fM21wVNIuY/edit?gid=0#gid=0
 
 ---
 
